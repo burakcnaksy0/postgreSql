@@ -1,0 +1,81 @@
+--------------------------------------------
+--Manage Transaction - COMMIT	
+--------------------------------------------
+
+-- start a transaction
+BEGIN;
+
+
+UPDATE courses
+SET published_date = published_date + interval '2 month'
+WHERE course_id = 1;
+
+
+INSERT INTO courses(course_name, description, published_date)
+VALUES('Working with PostgreSQL PL/PGSQL', 'Database Programming', '2023-03-10');
+
+  
+-- commit the change (or roll it back later)
+COMMIT;
+
+--------------------------------------------
+--Manage Transaction - ROLLBACK
+--------------------------------------------
+
+-- start a transaction
+BEGIN;
+
+
+INSERT INTO movie_reviews(movie_id, review)
+VALUES
+    (10, 'Wonderful'),
+    (8, 'Cool');
+
+UPDATE movie_reviews
+SET movie_id = 5
+WHERE review_id = 6;
+
+
+-- rollback the changes
+ROLLBACK TRANSACTION;
+
+--------------------------------------------
+
+BEGIN;
+
+UPDATE product_segment
+SET discount = discount + 0.05;
+
+SELECT * FROM product_segment;
+
+UPDATE product p
+SET net_price = price - price * s.discount
+FROM product_segment s
+WHERE p.segment_id = s.id;
+
+SELECT SUM(net_price) FROM product;
+
+ROLLBACK TRANSACTION;
+
+--------------------------------------------
+--Manage Transaction - SAVEPOINT
+--------------------------------------------
+
+-- start a transaction
+BEGIN;
+
+INSERT INTO movie_reviews(movie_id, review)
+VALUES (10, 'Wonderful');
+
+--New savepoint
+SAVEPOINT dbhunter;
+
+INSERT INTO movie_reviews(movie_id, review)
+VALUES(8, 'Bad');
+
+UPDATE movie_reviews
+SET movie_id = 5 WHERE review_id = 6;
+
+--Up to savepoint dbhunter changes are rollback
+ROLLBACK TO SAVEPOINT dbHunter;
+

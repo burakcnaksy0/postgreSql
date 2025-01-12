@@ -1,0 +1,228 @@
+--------------------------------------------
+--ADD Columns with Script
+--------------------------------------------
+
+ALTER TABLE staff
+ADD COLUMN email varchar(100);
+
+--------------------------------------------
+
+ALTER TABLE staff
+ADD COLUMN salary numeric(8,2) DEFAULT 0;
+
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+ADD COLUMN review_date date,
+ADD COLUMN last_update date DEFAULT CURRENT_DATE,
+ADD COLUMN review_rate int DEFAULT 1;
+
+--------------------------------------------
+--RENAME a Column
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+RENAME COLUMN review_date to user_review_date;
+
+--------------------------------------------
+
+ALTER TABLE student
+RENAME COLUMN class to class_no;
+
+--------------------------------------------
+--Change Default Value
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+ALTER COLUMN review
+SET DEFAULT 'Good';
+
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+ALTER COLUMN review_rate
+DROP DEFAULT;
+
+--------------------------------------------
+--Change Column Type
+--------------------------------------------
+
+ALTER TABLE courses
+ALTER COLUMN description TYPE TEXT;
+
+--------------------------------------------
+
+ALTER TABLE colors
+ALTER COLUMN color TYPE VARCHAR(20);
+
+--------------------------------------------
+
+ALTER TABLE budgets
+ALTER COLUMN current_year TYPE smallint,
+ALTER COLUMN previous_year TYPE smallint;
+
+--------------------------------------------
+--ADD Comment
+--------------------------------------------
+
+comment on table cars is 'This table contains car information';
+comment on table educations is 'All education information is here'; 
+
+--------------------------------------------
+
+comment on column cars.brand is 'Car brand';
+comment on column product.net_price is 'In this column, net price information is kept'; 
+
+--------------------------------------------
+--Comment List
+--------------------------------------------
+
+select * from
+(
+  select t.table_schema, t.table_name, 
+    pg_catalog.obj_description(pgc.oid, 'pg_class') as table_comment
+  from information_schema.tables t
+    inner join pg_catalog.pg_class pgc
+      on t.table_name = pgc.relname 
+  where t.table_type='BASE TABLE'
+    and t.table_schema='public'
+) sub
+where table_comment is not null;
+
+--------------------------------------------
+
+select
+  c.table_schema, c.table_name, c.column_name, 
+  pgd.description as column_comment
+from pg_catalog.pg_statio_all_tables as st
+  inner join pg_catalog.pg_description pgd 
+    on pgd.objoid = st.relid
+  inner join information_schema.columns c 
+    on pgd.objsubid   = c.ordinal_position 
+      and c.table_schema = st.schemaname 
+      and c.table_name   = st.relname;
+
+--------------------------------------------
+--Add – Drop NOT NULL
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+ALTER COLUMN review_rate
+SET NOT NULL;
+
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+ALTER COLUMN review_rate
+DROP NOT NULL;
+
+--------------------------------------------
+--Drop Columns
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+DROP COLUMN review_date,
+DROP COLUMN last_update;
+
+--------------------------------------------
+--CHECK Constraint
+--------------------------------------------
+
+ALTER TABLE movie_reviews
+ADD CHECK (review_rate between 1 and 5)
+
+--------------------------------------------
+--ADD Constraint
+--------------------------------------------
+
+ALTER TABLE courses
+ADD CONSTRAINT uq_courses UNIQUE (course_name);
+
+--------------------------------------------
+--DROP Constraint
+--------------------------------------------
+
+ALTER TABLE courses
+DROP CONSTRAINT uq_courses;
+
+--------------------------------------------
+--Rename Table
+--------------------------------------------
+
+ALTER TABLE courses
+RENAME TO courses_technical;
+
+--------------------------------------------
+--DROP Table
+--------------------------------------------
+
+DROP TABLE IF EXISTS budgets2;
+
+--------------------------------------------
+
+DROP TABLE authors, pages;
+
+--------------------------------------------
+
+CREATE TABLE authors (
+    author_id SMALLSERIAL PRIMARY KEY,
+    firstname VARCHAR (50),
+    lastname VARCHAR (50)
+);
+
+CREATE TABLE pages (
+    page_id SMALLSERIAL PRIMARY KEY,
+    title VARCHAR (255) NOT NULL,
+    author_id INT NOT NULL,
+    FOREIGN KEY (author_id) 
+        REFERENCES authors (author_id)
+);
+
+DROP TABLE IF EXISTS authors;
+
+DROP TABLE authors CASCADE;
+
+--------------------------------------------
+--TRUNCATE Table
+--------------------------------------------
+
+TRUNCATE TABLE colors;
+
+-----------------------------------------------------
+--EXERCISE ANSWERS
+-----------------------------------------------------
+
+--------------------------------------------
+--Alter Tables
+--------------------------------------------
+
+-- Add primary key for artist_id column
+alter table artist add constraint atrist_pk primary key(artist_id);
+
+-- Fix column names
+alter table artist rename column firstname to first_name
+alter table artist rename column lastname to last_name
+
+-- Add date of birth column
+alter table artist add column date_of_birth date
+
+-- Add address column (max 200 chars)
+alter table artist add column address varchar(200)
+
+-- Add city column with not null constraint
+alter table artist add column city varchar(100) not null
+
+-- Add zip code column (max value is 9999)
+alter table artist add zip_code int check (zip_code < 9999)
+
+-- Add company column (default value is Warner Bros)
+alter table artist add column company varchar(100) default 'Warner Bros'
+
+-- Address column change type to varchar(500)
+alter table artist alter column address type varchar(500)
+
+-- Add not null constraint to zip code column
+alter table artist alter column zip_code set not null
+
+-- Change table name: artist_info
+alter table artist rename to artist_info

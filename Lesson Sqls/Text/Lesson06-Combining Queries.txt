@@ -1,0 +1,166 @@
+--------------------------------------------
+--UNION Operator
+--------------------------------------------
+
+SELECT fruit_a FROM basket_a
+UNION
+SELECT fruit_b FROM basket_b
+
+select first_name, last_name, job_id, salary
+from employees
+where salary between 8000 and 12000
+UNION
+select first_name, last_name, job_id, salary
+from employees
+where job_id in (2,7,10,14,15,19)
+order by 1,2;
+
+--------------------------------------------
+--UNION ALL Operator
+--------------------------------------------
+
+select first_name, last_name, job_id, salary
+from employees
+where salary between 8000 and 12000
+UNION ALL
+select first_name, last_name, job_id, salary
+from employees
+where job_id in (2,7,10,14,15,19)
+order by 1,2;
+
+SELECT title, length, rating
+FROM film
+WHERE length < 50
+UNION ALL
+SELECT title, length, rating
+FROM film
+WHERE rating = 'PG'
+UNION ALL
+SELECT title, length, rating
+FROM film
+WHERE rating = 'R'
+ORDER BY title;
+
+--------------------------------------------
+--INTERSECT Operator
+--------------------------------------------
+
+select first_name, last_name, job_id, salary
+from employees
+where salary between 8000 and 12000
+INTERSECT
+select first_name, last_name, job_id, salary
+from employees
+where job_id in (2,7,10,14,15,19)
+order by 1,2;
+
+select title, description, length, rating  
+from film
+where rating = 'G'
+intersect
+select title, description, length, rating 
+from film
+where length > 170
+
+--------------------------------------------
+--EXCEPT Operator
+--------------------------------------------
+SELECT fruit_a FROM basket_a
+EXCEPT
+SELECT fruit_b FROM basket_b
+
+select first_name, last_name, job_id, salary
+from employees
+where salary between 8000 and 12000
+EXCEPT
+select first_name, last_name, job_id, salary
+from employees
+where job_id in (2,7,10,14,15,19)
+order by 1,2;
+
+--------------------------------------------
+--Combining Different Operators
+--------------------------------------------
+
+(
+    select title, description, length, rating 
+    from film
+    where length > 170
+    UNION
+    select title, description, length, rating  
+    from film
+    where rating = 'G'
+)
+EXCEPT
+select title, description, length, rating  
+from film
+where rating = 'G'
+  and rental_duration < 5
+
+-----------------------------------------------------
+--EXERCISE ANSWERS
+-----------------------------------------------------
+
+--------------------------------------------
+--UNION Operator
+--------------------------------------------
+
+select title, length, rating 
+from film
+where rating = 'PG'
+UNION
+select title, length, rating 
+from film f
+where f.special_features::varchar like '%Trailers%'
+
+--------------------------------------------
+--UNION ALL Operator
+--------------------------------------------
+
+select 
+  'Country' as place_type, 
+  country_id as place_id, 
+  country  as place_name
+from country
+union all
+select 
+  'City' as place_type, 
+  city_id as place_id, 
+  city as place_name
+from city
+union all
+select 
+  'Address' as place_type, 
+  address_id as place_id, 
+  address  as place_name
+from address
+
+--------------------------------------------
+--EXCEPT Operator
+--------------------------------------------
+
+select film_id, title
+from film
+except
+select distinct f.film_id, title
+from inventory i
+inner join film f 
+	on f.film_id = i.film_id
+
+select film_id, title
+from film
+where film_id not in 
+	(
+		select distinct film_id
+		from inventory i
+	)
+
+select film_id, title
+from film f
+where not exists
+	(
+		select 1
+		from inventory i
+		where f.film_id = i.film_id
+	)
+

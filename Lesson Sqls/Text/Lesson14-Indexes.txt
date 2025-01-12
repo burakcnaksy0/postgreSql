@@ -1,0 +1,149 @@
+--------------------------------------------
+--CREATE Index
+--------------------------------------------
+
+EXPLAIN
+SELECT * FROM address
+WHERE phone = '223664661973';
+
+CREATE INDEX idx_address_phone 
+ON address(phone);
+
+--------------------------------------------
+
+EXPLAIN
+SELECT * FROM film
+WHERE description = 'drama';
+
+CREATE INDEX idx_film_desc
+ON film(description);
+
+--------------------------------------------
+--CREATE Index – Multiple Column
+--------------------------------------------
+
+EXPLAIN
+SELECT * FROM staff_test
+WHERE first_name = 'Luis' AND last_name = 'Popp'
+
+CREATE INDEX idx_staff_test_names 
+ON staff_test (first_name, last_name);
+
+EXPLAIN
+SELECT * FROM staff_test
+WHERE first_name = 'Luis';
+
+--------------------------------------------
+--UNIQUE Indexes
+--------------------------------------------
+
+CREATE UNIQUE INDEX idx_employees_email ON employees(email);
+
+INSERT INTO employees(first_name, last_name, email, hire_date, job_id, salary)
+VALUES ('Daniel', 'Faviet Urman', 'daniel.faviet@sqltutorial.org', current_date, 4, 5000)
+
+--------------------------------------------
+
+CREATE UNIQUE INDEX idx_cust_name 
+ON customer(first_name, last_name, email);
+
+CREATE UNIQUE INDEX idx_payment 
+ON payment(customer_id, rental_id);
+
+--------------------------------------------
+--Index on Expression
+--------------------------------------------
+
+EXPLAIN
+SELECT 
+    customer_id, store_id
+    first_name, last_name 
+FROM customer 
+WHERE last_name = 'Ely';
+
+EXPLAIN
+SELECT 
+    customer_id, store_id
+    first_name, last_name 
+FROM customer 
+WHERE lower(last_name) = 'ely';
+
+CREATE INDEX idx_ic_last_name
+ON customer(LOWER(last_name));
+
+--------------------------------------------
+--Partial Index
+--------------------------------------------
+
+EXPLAIN
+SELECT
+    customer_id,
+    first_name, last_name
+FROM customer
+WHERE active = 0;
+
+CREATE INDEX idx_customer_inactive
+ON customer(active)
+WHERE active = 0;
+
+--------------------------------------------
+--DROP Index
+--------------------------------------------
+
+DROP INDEX idx_emp_job_id 
+
+--------------------------------------------
+--List Indexes
+--------------------------------------------
+
+--List of all indexes
+SELECT tablename, indexname, indexdef
+FROM pg_indexes
+WHERE schemaname = 'public'
+ORDER BY 1, 2;
+
+--Usage statistics of indexes
+
+SELECT schemaname, relname, 
+       indexrelname, idx_scan 
+FROM pg_stat_user_indexes 
+ORDER BY idx_scan;
+
+-----------------------------------------------------
+--EXERCISE ANSWERS
+-----------------------------------------------------
+
+--------------------------------------------
+--Create Index
+--------------------------------------------
+
+Table: address
+Column(s): district
+Type: Normal
+
+CREATE INDEX idx_address_district ON address(district);
+
+-------------------------------------------------------------
+
+Table: actor
+Column(s): first_name, last_name
+Type: Normal
+
+CREATE INDEX idx_actor_first_last_name ON actor(first_name, last_name);
+
+-------------------------------------------------------------
+
+Table: student
+Column(s): name, course_name
+Type: Unique
+
+CREATE UNIQUE INDEX idx_student_name_cname ON student(name, course_name);
+
+-------------------------------------------------------------
+
+Table: product
+Column(s): segment_id
+Type: Partial (segment_id = 1)
+
+CREATE INDEX idx_part_product_segment_id ON product(segment_id)
+WHERE segment_id = 1

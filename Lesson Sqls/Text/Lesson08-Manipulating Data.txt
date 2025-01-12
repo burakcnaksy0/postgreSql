@@ -1,0 +1,262 @@
+--------------------------------------------
+--INSERT – Single Row
+--------------------------------------------
+
+INSERT INTO departments(department_id, department_name, location_id)
+VALUES(13, 'Networking', 2400);
+
+INSERT INTO basket_a(id_a, fruit_a)
+VALUES(8, 'Plum');
+
+INSERT INTO basket_a
+VALUES(9, 'Watermelon');
+
+--------------------------------------------
+--INSERT – Single Row – Default Value
+--------------------------------------------
+
+INSERT INTO student(id, name, class, mark, gender, course_name)
+VALUES(36, 'Adele', DEFAULT, DEFAULT, DEFAULT, 'Finance');
+
+INSERT INTO student(id, name, class, mark, gender, course_name)
+VALUES(37, 'Tarkan', DEFAULT, 78, 'male', 'Zoology');
+
+INSERT INTO student(id, name, mark, course_name)
+VALUES(38, 'Ava Max', 85, 'History');
+
+--------------------------------------------
+--INSERT – RETURNING Clause
+--------------------------------------------
+
+CREATE TABLE basket_c 
+(
+    id_c SERIAL PRIMARY KEY,
+    fruit_c VARCHAR(50) NOT NULL,
+    calorie INTEGER DEFAULT 0
+);
+
+INSERT INTO basket_c(fruit_c)
+VALUES('Orange')
+RETURNING id_c;
+
+INSERT INTO basket_c(fruit_c)
+VALUES('Watermelon')
+RETURNING id_c AS last_id;
+
+--------------------------------------------
+--INSERT Multiple Rows
+--------------------------------------------
+
+INSERT INTO departments(department_id, department_name, location_id)
+VALUES
+    (14, 'Academy', 1700),
+    (15, 'Security', 1400),
+    (16, 'Logistic', 2500),
+    (17, 'Customer Experience', 2400);
+
+INSERT INTO basket_c(fruit_c)
+VALUES
+
+    ('Lime'),
+    ('Peach'),
+    ('Quince'),
+    ('Nectarine')
+RETURNING *;
+
+--------------------------------------------
+--Copying Rows from Another Table
+--------------------------------------------
+
+INSERT INTO basket_c (fruit_c)
+SELECT fruit_a 
+FROM basket_a
+UNION
+SELECT fruit_b 
+FROM basket_b
+
+create table managers as
+select * from employees
+where 1=0
+
+INSERT INTO managers
+SELECT * FROM employees
+WHERE job_id IN 
+    (
+        SELECT job_id FROM jobs
+        WHERE LOWER(job_title) LIKE '%manager%'
+    )
+
+--------------------------------------------
+--UPDATE - Single Row
+--------------------------------------------
+
+UPDATE student
+SET mark = 85 
+WHERE id = 3
+
+UPDATE cars 
+SET brand = 'Mercedes Benz'
+WHERE id = 1
+
+--------------------------------------------
+--UPDATE - Multiple Row
+--------------------------------------------
+
+UPDATE employees
+SET salary = salary + 1000, 
+    manager_id = 22 
+WHERE employee_id IN (13,14);
+
+UPDATE student 
+SET course_name = 'Finance'
+WHERE course_name = 'Economics';
+
+--------------------------------------------
+--UPDATE - Returning
+--------------------------------------------
+
+UPDATE film
+SET replacement_cost = 20, 
+   last_update = current_date
+WHERE film_id = 100
+RETURNING *
+
+--------------------------------------------
+--UPDATE - JOIN
+--------------------------------------------
+
+UPDATE product p
+SET net_price = price - price * s.discount
+FROM product_segment s
+WHERE p.segment_id = s.id;
+
+UPDATE employees e
+SET salary = salary * 1.2
+FROM jobs j
+WHERE e.job_id = j.job_id
+     AND LOWER(job_title) LIKE '%manager%'
+
+--------------------------------------------
+--DELETE – Single Row
+--------------------------------------------
+
+DELETE FROM basket_c
+WHERE id_c = 5;
+
+DELETE FROM staff
+WHERE staff_id = 104;
+
+DELETE FROM product
+WHERE name = 'Oven';
+
+DELETE FROM student
+WHERE id = 36;
+
+DELETE FROM student
+WHERE name = 'Arnold';
+
+DELETE FROM courses
+WHERE id = 3;
+
+--------------------------------------------
+--DELETE – Multiple Row
+--------------------------------------------
+
+DELETE FROM basket_c
+WHERE id_c IN (8, 9);
+
+DELETE FROM basket_c
+WHERE fruit_c = 'Orange';
+
+DELETE FROM basket_c
+WHERE fruit_c IN 
+   (SELECT fruit_b FROM basket_b)
+
+DELETE FROM student
+WHERE course_name = 'Finance';
+
+--------------------------------------------
+--DELETE – Returning
+--------------------------------------------
+
+DELETE FROM colors
+RETURNING *;
+
+DELETE FROM student
+WHERE id = 17
+RETURNING name, course_name;
+
+DELETE FROM cars
+WHERE price > 150000
+
+--------------------------------------------
+--DELETE – JOIN
+--------------------------------------------
+
+DELETE FROM movies m
+USING movie_reviews mr
+WHERE mr.movie_id = m.movie_id
+
+
+-----------------------------------------------------
+--EXERCISE ANSWERS
+-----------------------------------------------------
+
+--------------------------------------------
+--INSERT – Single Row
+--------------------------------------------
+
+INSERT INTO staff(staff_id, first_name, last_name, hire_date, departure_date)
+VALUES(300, 'Billie', 'Eilish', '2023-02-01', NULL);
+
+INSERT INTO staff
+VALUES(301, 'Alan', 'Walker', '2023-01-01', '2032-12-31');
+
+--------------------------------------------
+--UPDATE – JOIN
+--------------------------------------------
+
+UPDATE employees e
+SET salary = salary * 1.2
+FROM jobs j
+WHERE e.job_id = j.job_id
+     AND LOWER(job_title) LIKE '%manager%'
+
+UPDATE employees
+SET salary = salary * 1.2
+WHERE job_id IN 
+    (
+        SELECT job_id FROM jobs
+        WHERE LOWER(job_title) LIKE '%manager%'
+    )
+
+--------------------------------------------
+--DELETE – JOIN
+--------------------------------------------
+
+--Exercise-1
+
+DELETE FROM movies m
+USING movie_reviews mr
+WHERE mr.movie_id = m.movie_id
+
+DELETE FROM movies m
+WHERE m.movie_id IN 
+(
+    SELECT mr.movie_id FROM movie_reviews mr 
+);
+
+DELETE FROM movies m
+WHERE EXISTS 
+(
+    SELECT 1 FROM movie_reviews mr 
+    WHERE m.movie_id = mr.movie_id
+);
+
+--Exercise-2
+
+DELETE FROM product p
+USING product_segment ps
+WHERE p.segment_id = ps.id
+    and ps.segment = 'Luxury'
+
